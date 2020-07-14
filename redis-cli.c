@@ -25,7 +25,7 @@ char *ask_inp(int conn_status, int db)
       printf("(%d)", db);
     }
   }
-  printf(" $ ");
+  printf("$ ");
 
   char *inp = calloc(255, 1);
   gets(inp);

@@ -16,26 +16,69 @@ char *make_cmd(char *inp)
   return cmd;
 }
 
-void parse_and_show(char *res)
+int parse_len(char *res)
 {
-  char resp_type = res[0];
+  char *pos = strchr(res, '\n');
+
+  *pos = '\0';
+  int len = atoi(res + 1);
+
+  *pos = '\n';
+  return len;
+}
+
+void parse_and_show(char *buffer)
+{
+  char resp_type = buffer[0];
+  char *res = buffer;
+
+  if (resp_type == ':')
+  {
+    res++;
+    printf("(integer) %d\r\n", atoi(res));
+    return;
+  }
 
   if (resp_type == '+' || resp_type == '-')
   {
-    char *response = res;
-    response++;
-    printf("%s", response);
+    res++;
   }
 
-  else if (resp_type == ':')
+  if (resp_type == '$')
   {
-    char *response = res;
-    response++;
-    printf("%d\r\n", atoi(response));
+    int len = parse_len(res);
+
+    if (len == -1)
+    {
+      res = "(nil)\r\n";
+    }
+    else
+    {
+      res = strchr(res, '\n');
+      res++;
+    }
   }
 
-  else
+  if (resp_type == '*')
   {
-    printf("%s", res);
+    int len = parse_len(res);
+
+    if (len == -1)
+    {
+      res = "(nil)\r\n";
+    }
+
+    else if (len == 0)
+    {
+      res = "(empty list)\r\n";
+    }
+
+    else
+    {
+      res = strchr(res, '\n');
+      res++;
+    }
   }
+
+  printf("%s", res);
 }
