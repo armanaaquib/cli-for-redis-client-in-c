@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <string.h>
-#include "redis_client.h"
 
-char *ask_cmd(int conn_status)
+#include "redis_client.h"
+#include "resp_parser.h"
+
+#define RES_BUFF_SIZE 1024
+
+char *ask_inp(int conn_status)
 {
   if (conn_status < 0)
   {
@@ -15,9 +19,9 @@ char *ask_cmd(int conn_status)
     printf(RED_HOST_ADDR ":" RED_HOST_PORT " $ ");
   }
 
-  char *cmd = calloc(255, 1);
-  gets(cmd);
-  return cmd;
+  char *inp = calloc(255, 1);
+  gets(inp);
+  return inp;
 }
 
 int main(void)
@@ -26,21 +30,15 @@ int main(void)
 
   while (1)
   {
-    char *cmd = ask_cmd(sockfd);
+    char *cmd = make_cmd(ask_inp(sockfd));
     sockfd = create_connection();
 
-    int l = strlen(cmd);
-    char *n_cmd = calloc(l + 2, 1);
-    strcpy(n_cmd, cmd);
-    n_cmd[l] = '\r';
-    n_cmd[l + 1] = '\n';
+    send(sockfd, cmd, strlen(cmd), 0);
 
-    send(sockfd, n_cmd, l + 2, 0);
+    char buffer[RES_BUFF_SIZE];
+    bzero(buffer, RES_BUFF_SIZE);
 
-    char buffer[256];
-    bzero(buffer, 256);
-
-    recv(sockfd, buffer, 255, 0);
+    recv(sockfd, buffer, RES_BUFF_SIZE - 1, 0);
 
     printf("%s", buffer);
   }
