@@ -14,7 +14,7 @@ struct sockaddr_in get_redis_server(void)
 
   redis_server.sin_family = AF_INET;
   redis_server.sin_addr.s_addr = inet_addr(RED_HOST_ADDR);
-  redis_server.sin_port = htons(RED_HOST_PORT);
+  redis_server.sin_port = htons(atoi(RED_HOST_PORT));
 
   return redis_server;
 }
@@ -33,8 +33,8 @@ int create_connection()
 
   if (connect(sockfd, (const struct sockaddr *)&redis_server, sizeof(redis_server)) < 0)
   {
-    perror("ERROR connecting");
-    exit(1);
+    perror("Could not connect to Redis at " RED_HOST_ADDR ":" RED_HOST_PORT);
+    return -1;
   }
 
   return sockfd;
