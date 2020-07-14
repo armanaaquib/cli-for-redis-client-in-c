@@ -77,6 +77,31 @@ void parse_and_show(char *buffer)
     {
       res = strchr(res, '\n');
       res++;
+
+      for (size_t i = 0; i < len; i++)
+      {
+        char type = res[0];
+        int no_of_steps = 1;
+
+        if ((type == '$' || type == '*') && parse_len(res) >= 0)
+        {
+          no_of_steps = 2;
+        }
+
+        char *temp = res;
+        for (size_t i = 0; i < no_of_steps; i++)
+        {
+          temp = strchr(temp, '\n');
+          temp++;
+        }
+
+        char old_char = *temp;
+        *temp = '\0';
+
+        parse_and_show(res);
+        *temp = old_char;
+        res = temp;
+      }
     }
   }
 
